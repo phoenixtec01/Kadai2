@@ -31,6 +31,7 @@ public class main {
 				}
 				IP.sqlclose();
 				break;
+				
 			case "inputdata":
 				
 				Inputdata ID = new Inputdata(URL);
@@ -42,9 +43,21 @@ public class main {
 				}
 				ID.sqlclose();
 				break;
+				
 			case "outputplan":
+				
+				Outputplan OP = new Outputplan(URL); //SQL接続
+				
+				if(OP.parcheak(args)==false) { //パラメータ確認
+					System.out.println("parameter error!");
+				}else { //データ記入
+					OP.datainput();
+					System.out.println("Outputplan finished.");
+				}
+				OP.sqlclose();
 				break;
-			case "outputdata":
+				
+			case "outputdata"://仕掛中
 				break;
 			case "stock":
 				break;
