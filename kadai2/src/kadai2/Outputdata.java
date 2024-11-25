@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Outputdata { //仕掛中
+public class Outputdata { 
 	private Connection conn =null;
 
 	private String outputcode; //予約コード
@@ -53,55 +53,107 @@ public class Outputdata { //仕掛中
 		return parflag;
 	}
 	
-	public void dataoutput() throws SQLException {
-		int rackid;
-		final int RACKID = 1; 
+	public void datainput() throws SQLException {
+		int itemid;
+		int items;
+		int days;
+		int itemdata[][];
 		final int STATUS = 1;
 		final int CODE = 2;
-
-		//指定商品コードの棚を検索するSQL
-		String sql1 = "select rackid,items from rack where itemid = 0";
-		
-		//指定した棚の棚番号に、出荷予定データの予約番号に一致した商品コード、商品数、出荷予定日を入れるSQL
-		String sql2 ="update rack set "
-				+ "itemid = outputplan.itemid," //棚の商品コードは出荷予定データの商品コード
-				+ "items = outputplan.outputitems," //棚の商品数は出荷予定データの出荷予定数
-				+ "outputday = outputplan.outputplanday " //棚の出荷日は出荷予定データの出荷予定日
-				+ "from outputplan where " //データを入れる条件は
-				+ "rack.rackid = ? " //入力位置は棚番号の空き位置であること
-				+ "and outputplan.outputcode = ? " //予約番号が同じ場所であること
-				+ "and outputplan.outputstatus = 0;"; //商品が未出荷状態であること
-		
-		//出荷後に出荷予定データの出荷済みフラグをオンにするSQL
-		String sql3 = "update outputplan set outputstatus = ? where outputcode = ? ";
-		
-		//在庫一覧を更新するSQL
-		String sql4 ="replace into stock (itemid,stockitems) "
-				+ "select itemid,sum(items) "
-				+ "from rack group by itemid";
 		
 		for (;;) {
 			
-			//空の棚を検索
-			/*PreparedStatement stmt1 = conn.prepareStatement(sql1);
-			ResultSet rs1 = stmt1.executeQuery();
-			rackid = rs1.getInt("rackid");
-			rs1.close();
-			stmt1.close();
+			//予約コードに記載された商品コードと商品数を取得するSQL
+			String sql0 = "select itemid,outputitems,outputplanday from outputplan where outputcode = ?";
 			
-			//棚がいっぱいならエラー処理
-			if (rackid== 0) {
-				System.out.println("棚がいっぱいです。");
+			//予約コードに記載された商品コードと商品数を取得するSQL
+			PreparedStatement stmt0 = conn.prepareStatement(sql0);
+			stmt0.setString(1, outputcode);
+			ResultSet rs0 = stmt0.executeQuery();
+			itemid = rs0.getInt("itemid");
+			items = rs0.getInt("outputitems");
+			days = rs0.getInt("outputplanday");
+			rs0.close();
+			stmt0.close();
+			
+			//指定商品コードの棚を検索するSQL
+			String sql1 = "select rackid,items from rack where itemid = ?";
+			
+			//指定した商品IDのがある棚を検索
+			PreparedStatement stmt1 = conn.prepareStatement(sql1);
+			stmt1.setInt(1,itemid);
+			ResultSet rs1 = stmt1.executeQuery();
+
+			int rowCount = 0;
+			while (rs1.next()) {
+			    rowCount++;
+			}
+			rs1.close();
+			
+			//指定した商品IDが棚に無ければエラー処理
+			if (rowCount == 0) {
+				System.out.println("指定した商品が棚にありません");
 				break;
 			}
-			*/
-			//指定した棚の棚番号に、出荷予定データの予約番号に一致した商品コード、商品数、出荷予定日を入れる
-			PreparedStatement stmt2 = conn.prepareStatement(sql2);
-			stmt2.setInt(RACKID,rackid);
-			stmt2.setString(CODE, outputcode);
-		    stmt2.executeUpdate();
-			stmt2.close();
 			
+			itemdata = new int[rowCount][2];
+			int i =0;
+			int maxitems = 0;		
+			ResultSet rs1_1 = stmt1.executeQuery();
+			while (rs1_1.next()) {
+				itemdata[i][0] = rs1_1.getInt("rackid");
+				itemdata[i][1] = rs1_1.getInt("items");
+				maxitems = maxitems + rs1_1.getInt("items");
+				i++;
+			}
+			
+			rs1_1.close();
+			stmt1.close();
+			
+			//指定した商品が足りなければエラー処理
+			if (maxitems < items) {
+				System.out.println("商品が足りません");
+				break;
+			}
+			
+			
+			//指定した棚の棚番号から指定数商品を引き出すSQL文
+			String sql2 ="update rack set items = ? where rackid = ?"; 
+			
+			//出荷が発生した棚番号に出荷日を設定するSQL文
+			String sql2_1 ="update rack set outputday = ? where rackid = ?";
+			
+			
+			int j = 0;
+			for	(;;) {
+				PreparedStatement stmt2 = conn.prepareStatement(sql2);
+				PreparedStatement stmt2_1 = conn.prepareStatement(sql2_1);
+				if (itemdata[j][1] < items) {//倉庫にある数が出荷予定数を下回る場合は全商品を出荷する
+					stmt2.setInt(1, 0);
+					stmt2.setInt(2, itemdata[j][0]);
+					items =items - itemdata[j][1];//出荷した分、出荷予定数を減らす
+				}else {//倉庫にある数が出荷予定数を上回る場合は出荷数分減らす
+					stmt2.setInt(1, itemdata[j][1]-items);
+					stmt2.setInt(2, itemdata[j][0]);
+					items = 0; //全出荷したので、出荷予定数を0にする
+				}
+			    stmt2.executeUpdate();
+				stmt2.close();
+				stmt2_1.setInt(1, days);
+				stmt2_1.setInt(2, itemdata[j][0]);
+			    stmt2_1.executeUpdate();
+			    stmt2_1.close();
+			    
+				if (items ==0){//出荷予定数分出荷したら終了
+					break;
+				}
+				j++;
+			}
+			
+			
+			//出荷後に出荷予定データの出荷済みフラグをオンにするSQL
+			String sql3 = "update outputplan set outputstatus = ? where outputcode = ? ";
+
 			//出荷後に出荷予定データの出荷済みフラグをオンにする
 			PreparedStatement stmt3 = conn.prepareStatement(sql3);
 			stmt3.setInt(STATUS, STATUS);
@@ -109,11 +161,63 @@ public class Outputdata { //仕掛中
 		    stmt3.executeUpdate();
 			stmt3.close();
 			
+			
+			//在庫一覧を更新するSQL
+			String sql4 ="replace into stock (itemid,stockitems) "
+					+ "select itemid,sum(items) "
+					+ "from rack group by itemid";
+			
 			//在庫一覧を更新
 			PreparedStatement stmt4 = conn.prepareStatement(sql4);
 		    stmt4.executeUpdate();
 			stmt4.close();
 			
+			//在庫がなく、入荷日と出荷日が両方入っている棚のデータを表示するSQL(初期化が必要な棚の検索)
+			String sql5 = "select rackid from rack where items = 0 and inputday != '0'"
+					+ " and outputday != '0'";
+			PreparedStatement stmt5 = conn.prepareStatement(sql5);
+			ResultSet rs5 = stmt5.executeQuery();
+			
+			int rowCount2 = 0;
+			while (rs5.next()) {
+			    rowCount2++;
+			    //System.out.println(rs5.getInt("rackid"));
+			}
+			rs5.close();
+			
+			//初期化する棚が無ければここで終了
+			if (rowCount2 == 0) {
+				break;
+			}
+			
+			int resetid[] = new int [rowCount2];
+			int k =0;
+		
+			ResultSet rs5_1 = stmt5.executeQuery();
+			while (rs5_1.next()) {
+				resetid[k] = rs5_1.getInt("rackid");
+				//System.out.println(resetid[k]);
+				k++;
+			}
+			rs5_1.close();
+			stmt5.close();
+			
+			//棚データを初期化するSQL
+			String sql6 = "update rack set itemid = 0 , inputday = 0 , "
+					+ "outputday = 0 where rackid = ?";
+			
+			int l =0;
+			for(;;) {
+				PreparedStatement stmt6 = conn.prepareStatement(sql6);
+				stmt6.setInt(1, resetid[l]);
+			    stmt6.executeUpdate();
+				stmt6.close();
+			    l++;
+			    
+			    if (l == rowCount2) {
+			    	break;
+			    }			
+			}
 			break;
 		}
 	}

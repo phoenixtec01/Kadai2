@@ -35,11 +35,11 @@ public class main {
 			case "inputdata":
 				
 				Inputdata ID = new Inputdata(URL);
-				
 				if(ID.parcheak(args)==false) {
 					System.out.println("parameter error!");	
 				} else {
 					ID.datainput();
+					System.out.println("Inputdata finished.");
 				}
 				ID.sqlclose();
 				break;
@@ -57,9 +57,22 @@ public class main {
 				OP.sqlclose();
 				break;
 				
-			case "outputdata"://仕掛中
+			case "outputdata":
+				Outputdata OD = new Outputdata(URL);
+				
+				if(OD.parcheak(args)==false) {
+					System.out.println("parameter error!");	
+				} else {
+					OD.datainput();
+					System.out.println("Outputdata finished.");
+				}
+				OD.sqlclose();
 				break;
-			case "stock":
+				
+			case "stock"://仕掛中
+				Stockview SV = new Stockview(URL);
+				
+				SV.sqlclose();
 				break;
 			case "item":
 				break;
