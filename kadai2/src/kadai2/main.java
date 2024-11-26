@@ -71,10 +71,19 @@ public class main {
 				
 			case "stock"://仕掛中
 				Stockview SV = new Stockview(URL);
-				
+				if(SV.parcheak(args)==false) {
+					System.out.println("parameter error!");	
+				} else {
+					SV.views(args);
+					System.out.println("Stockview finished.");
+				}
 				SV.sqlclose();
 				break;
 			case "item":
+				Itemlist IL = new Itemlist(URL);
+				//IL.views();
+				
+				IL.sqlclose();
 				break;
 			case "inputview":
 				break;

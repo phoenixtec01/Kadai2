@@ -40,9 +40,9 @@ public class Inputplan {
 				break;
 			}
 
-			//商品IDの内容チェック(IDは0以上なので、0未満はNG)
-			if (inputitemid < 0) {
-				System.out.println("商品IDの値が不正です");
+			//商品コードの内容チェック(商品コードが登録されていない商品や商品コードが0の場合はNG)
+			if (itemcheak(inputitemid) ==false || inputitemid ==0) {
+				System.out.println("商品コードの値が不正です");
 				break;
 			}
 			
@@ -85,6 +85,25 @@ public class Inputplan {
 		rs.close();
 		stmt.close();
 		return codeflag;
+	}
+	
+	//商品コードチェック
+	private boolean itemcheak(int id) throws SQLException{
+		boolean itemflag = false;
+
+		String sql0 = " select itemid from master where itemid = ?";
+		PreparedStatement stmt0 = conn.prepareStatement(sql0);
+		
+		stmt0.setInt(1,id);
+		ResultSet rs0 = stmt0.executeQuery();
+		
+		if (rs0.getString("itemid") != null) {//商品コードが存在しなかったらしてなかったらnullを返す
+			itemflag = true;
+		}else {
+			itemflag = false;
+		}
+		
+		return itemflag;
 	}
 	
 	//データ記入

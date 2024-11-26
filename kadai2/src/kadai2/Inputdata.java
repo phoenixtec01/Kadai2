@@ -53,67 +53,91 @@ public class Inputdata {
 		final int RACKID = 1; 
 		final int STATUS = 1;
 		final int CODE = 2;
-
-		for (;;) {
-			
-			//空の棚を検索するSQL
-			String sql1 = "select rackid,items from rack where items = 0";
-			
-			//空の棚を検索
-			PreparedStatement stmt1 = conn.prepareStatement(sql1);
-			ResultSet rs1 = stmt1.executeQuery();
-			rackid = rs1.getInt("rackid");
-			rs1.close();
-			stmt1.close();
-			
-			//棚がいっぱいならエラー処理
-			if (rackid== 0) {
-				System.out.println("棚がいっぱいです。");
+		try {
+			conn.setAutoCommit(false);
+		
+			for (;;) {
+				
+				//空の棚を検索するSQL
+				String sql1 = "select rackid,items from rack where items = 0";
+				
+				//空の棚を検索
+				PreparedStatement stmt1 = conn.prepareStatement(sql1);
+				ResultSet rs1 = stmt1.executeQuery();
+				rackid = rs1.getInt("rackid");
+				rs1.close();
+				stmt1.close();
+				
+				//棚がいっぱいならエラー処理
+				if (rackid== 0) {
+					System.out.println("棚がいっぱいです。");
+					break;
+				}
+				
+				
+				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れるSQL
+				String sql2 ="update rack set "
+						+ "itemid = inputplan.itemid," //棚の商品コードは入荷予定データの商品コード
+						+ "items = inputplan.inputitems," //棚の商品数は入荷予定データの入荷予定数
+						+ "inputday = inputplan.inputplanday " //棚の入荷日は入荷予定データの入荷予定日
+						+ "from inputplan where " //データを入れる条件は
+						+ "rack.rackid = ? " //入力位置は棚番号の空き位置であること
+						+ "and inputplan.inputcode = ? " //予約番号が同じであること
+						+ "and inputplan.inputstatus = 0;"; //商品が未入荷状態であること
+				
+				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れる
+				PreparedStatement stmt2 = conn.prepareStatement(sql2);
+				stmt2.setInt(RACKID,rackid);
+				stmt2.setString(CODE, inputcode);
+			    stmt2.executeUpdate();
+				stmt2.close();
+				
+				
+				//入荷後に入荷予定データの入荷済みフラグをオンにするSQL
+				String sql3 = "update inputplan set inputstatus = ? where inputcode = ? ";
+				
+				//入荷後に入荷予定データの入荷済みフラグをオンにする
+				PreparedStatement stmt3 = conn.prepareStatement(sql3);
+				stmt3.setInt(STATUS, STATUS);
+				stmt3.setString(CODE, inputcode);
+			    stmt3.executeUpdate();
+				stmt3.close();
+				
+				
+				//在庫一覧を更新するSQL
+				String sql4 ="replace into stock (itemid,stockitems) "
+						+ "select itemid,sum(items) "
+						+ "from rack group by itemid";
+				
+				//在庫一覧を更新
+				PreparedStatement stmt4 = conn.prepareStatement(sql4);
+			    stmt4.executeUpdate();
+				stmt4.close();
+				
+				conn.commit();
 				break;
 			}
-			
-			
-			//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れるSQL
-			String sql2 ="update rack set "
-					+ "itemid = inputplan.itemid," //棚の商品コードは入荷予定データの商品コード
-					+ "items = inputplan.inputitems," //棚の商品数は入荷予定データの入荷予定数
-					+ "inputday = inputplan.inputplanday " //棚の入荷日は入荷予定データの入荷予定日
-					+ "from inputplan where " //データを入れる条件は
-					+ "rack.rackid = ? " //入力位置は棚番号の空き位置であること
-					+ "and inputplan.inputcode = ? " //予約番号が同じであること
-					+ "and inputplan.inputstatus = 0;"; //商品が未入荷状態であること
-			
-			//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れる
-			PreparedStatement stmt2 = conn.prepareStatement(sql2);
-			stmt2.setInt(RACKID,rackid);
-			stmt2.setString(CODE, inputcode);
-		    stmt2.executeUpdate();
-			stmt2.close();
-			
-			
-			//入荷後に入荷予定データの入荷済みフラグをオンにするSQL
-			String sql3 = "update inputplan set inputstatus = ? where inputcode = ? ";
-			
-			//入荷後に入荷予定データの入荷済みフラグをオンにする
-			PreparedStatement stmt3 = conn.prepareStatement(sql3);
-			stmt3.setInt(STATUS, STATUS);
-			stmt3.setString(CODE, inputcode);
-		    stmt3.executeUpdate();
-			stmt3.close();
-			
-			
-			//在庫一覧を更新するSQL
-			String sql4 ="replace into stock (itemid,stockitems) "
-					+ "select itemid,sum(items) "
-					+ "from rack group by itemid";
-			
-			//在庫一覧を更新
-			PreparedStatement stmt4 = conn.prepareStatement(sql4);
-		    stmt4.executeUpdate();
-			stmt4.close();
-			
-			break;
-		}
+
+		}catch(SQLException e) {
+            try {
+                // トランザクションのロールバック
+                conn.rollback();
+                System.out.println("rollback finished");
+            } catch (SQLException e2) {
+                // スタックトレースを出力
+                e2.printStackTrace();
+            }
+		} finally {
+            if(conn != null) {
+                try {
+                    // オートコミット有効化
+                    conn.setAutoCommit(true);
+                } catch(SQLException e3) {
+                    // スタックトレースを出力
+                    e3.printStackTrace();
+                }
+            }
+        }	
 	}
 	
 	//予約コード存在確認
