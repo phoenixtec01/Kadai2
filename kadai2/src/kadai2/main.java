@@ -69,7 +69,7 @@ public class main {
 				OD.sqlclose();
 				break;
 				
-			case "stock"://仕掛中
+			case "stock":
 				Stockview SV = new Stockview(URL);
 				if(SV.parcheak(args)==false) {
 					System.out.println("parameter error!");	
@@ -81,11 +81,15 @@ public class main {
 				break;
 			case "item":
 				Itemlist IL = new Itemlist(URL);
-				//IL.views();
+				IL.views();
 				
 				IL.sqlclose();
 				break;
-			case "inputview":
+			case "inputview"://仕掛中
+				Inputview IV = new Inputview(URL);
+				IV.views();
+				
+				IV.sqlclose();
 				break;
 			case "outputview":
 				break;

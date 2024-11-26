@@ -166,7 +166,7 @@ public class Outputdata {
 				
 				//在庫一覧を更新するSQL
 				String sql4 ="replace into stock (itemid,stockitems) "
-						+ "select itemid,sum(items) "
+						+ "select itemid,sum(items) where itemid != 0 "
 						+ "from rack group by itemid";
 				
 				//在庫一覧を更新

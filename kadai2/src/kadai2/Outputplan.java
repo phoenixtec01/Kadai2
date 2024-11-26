@@ -124,15 +124,6 @@ public class Outputplan {
 	    stmt2.setInt(STATUS, 0);
 	    stmt2.executeUpdate();
 	    
-	   /* conn.setAutoCommit(false);
-        try {
-        	stmt2.executeUpdate();
-            conn.beginRequest();
-            conn.commit();
-        }catch (Exception e) {
-            conn.rollback();
-            System.out.println("データの更新に失敗");
-        }*/
         stmt2.close();
 	}
 	
