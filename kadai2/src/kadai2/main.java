@@ -23,7 +23,7 @@ public class main {
 				
 				Inputplan IP = new Inputplan(URL); //SQL接続
 				
-				if(IP.parcheak(args)==false) { //パラメータ確認
+				if(IP.Parcheak(args)==false) { //パラメータ確認
 					System.out.println("parameter error!");
 				}else { //データ記入
 					IP.datainput();

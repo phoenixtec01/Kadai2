@@ -1,29 +1,36 @@
 package kadai2;
 import java.sql.*;
 
-public class Inputplan {
+public class Inputplan extends Parcheak{
 
 	//private final String SQL = "select * from employee where id =? ;";
 	private Connection conn =null;
 	private int inputitemid; //商品コード
 	private int inputitems; //予定数
-	private int inputplanday; //予定日
+	private String inputplanday; //予定日
 	private String inputcode; //予約コード
 	
 	//SQL接続
 	public Inputplan(String URL) throws SQLException {	
 		conn = DriverManager.getConnection(URL);
+		
 	}
 	
 	//パラメータ確認
-	public boolean parcheak(String[] args) throws SQLException {
+	public boolean Parcheak(String[] args) throws SQLException {
 		boolean parflag = false;
 		final int CODECOUNT = 8; //予約コードの文字数
 		final int ARGSCOUNT = 5; //argsの数
 		
 		for (;;) {
-			if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
+			//パラメータの数をカウント(１つはサブコマンドで確定)
+			/*if (args.length != ARGSCOUNT) {	
 				System.out.println("パラメータの数があっていません");
+				break;
+			}*/
+			
+			boolean argflag =super.Parcheak(args,ARGSCOUNT);
+			if (argflag ==false) {
 				break;
 			}
 			
@@ -32,14 +39,18 @@ public class Inputplan {
 			inputcode =args[index++];
 			inputitemid = Integer.parseInt(args[index++]);
 			inputitems =Integer.parseInt(args[index++]);
-			inputplanday = Integer.parseInt(args[index++]);
+			inputplanday = args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			if (inputcode.length() != CODECOUNT) {
+			/*if (inputcode.length() != CODECOUNT) {
 				System.out.println("予約コードが8桁ではありません");
 				break;
+			}*/
+			
+			boolean codeflag = super.Parcheak(inputcode, CODECOUNT);
+			if (codeflag ==false) {
+				break;
 			}
-
 			//商品コードの内容チェック(商品コードが登録されていない商品や商品コードが0の場合はNG)
 			if (itemcheak(inputitemid) ==false || inputitemid ==0) {
 				System.out.println("商品コードの値が不正です");
@@ -47,13 +58,24 @@ public class Inputplan {
 			}
 			
 			//予定数の内容チェック(予定数は1以上なので、0未満はNG)
-			if (inputitems < 1) {
+			/*if (inputitems < 1) {
 				System.out.println("予定数の値が不正です");
 				break;
+			}*/
+			
+			boolean itemflag = super.Parcheak(inputitems);
+			if (itemflag ==false) {
+				break;
 			}
+
 			//日付の内容チェック(日付は8桁表示なので、8桁ないとNG)
-			if (String.valueOf(inputplanday).length() != 8 ) {
+			/*if (inputplanday.length() != 8 ) {
 				System.out.println("日付の値が不正です");
+				break;
+			}*/
+			
+			boolean dayflag = super.Parcheak(inputplanday);
+			if (dayflag ==false) {
 				break;
 			}
 			
@@ -69,6 +91,7 @@ public class Inputplan {
 		return parflag;
 	}
 	
+
 	//予約コード重複確認
 	private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
@@ -118,22 +141,48 @@ public class Inputplan {
 		
 	    stmt2.setInt(ITEMID, inputitemid);
 	    stmt2.setInt(ITEMS, inputitems);
-	    stmt2.setInt(PLANDAY, inputplanday);
+	    stmt2.setString(PLANDAY, inputplanday);
 	    stmt2.setString(CODE, inputcode);
 	    stmt2.setInt(STATUS, 0);
 	    stmt2.executeUpdate();
 	    
-	   /* conn.setAutoCommit(false);
-        try {
-        	stmt2.executeUpdate();
-            conn.beginRequest();
-            conn.commit();
-        }catch (Exception e) {
-            conn.rollback();
-            System.out.println("データの更新に失敗");
-        }*/
         stmt2.close();
+        
+       
 	}
+	
+	/* public void listinput () throws SQLException {
+        String sql3_1 ="into inputlist2 (itemid,inputitems,inputplanday,inputcode,inputstatus) select itemid,inputitems,inputplanday,inputcode,inputstatus from inputplan";
+        String sql3_2 ="select max(version) from inputlist2";
+        String sql3_3 ="update inputlist2 set version = ? where version is 0";
+        
+        try {
+        	conn.setAutoCommit(false);
+        	
+        	
+        	
+        }catch(SQLException e) {
+            try {
+                // トランザクションのロールバック
+                conn.rollback();
+                System.out.println("rollback finished");
+            } catch (SQLException e2) {
+                // スタックトレースを出力
+                e2.printStackTrace();
+            }
+		} finally {
+            if(conn != null) {
+                try {
+                    // オートコミット有効化
+                    conn.setAutoCommit(true);
+                } catch(SQLException e3) {
+                    // スタックトレースを出力
+                    e3.printStackTrace();
+                }
+            }
+        }
+ 	
+	}*/
 	
 	//SQL切断
 	public void sqlclose() throws SQLException {

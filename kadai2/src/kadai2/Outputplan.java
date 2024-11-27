@@ -10,7 +10,7 @@ public class Outputplan {
 	private Connection conn =null;
 	private int outputitemid; //商品コード
 	private int outputitems; //予定数
-	private int outputplanday; //予定日
+	private String outputplanday; //予定日
 	private String outputcode; //予約コード
 	
 	//SQL接続
@@ -35,7 +35,7 @@ public class Outputplan {
 			outputcode =args[index++];
 			outputitemid = Integer.parseInt(args[index++]);
 			outputitems =Integer.parseInt(args[index++]);
-			outputplanday = Integer.parseInt(args[index++]);
+			outputplanday = args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
 			if (outputcode.length() != CODECOUNT) {
@@ -55,7 +55,7 @@ public class Outputplan {
 				break;
 			}
 			//日付の内容チェック(日付は8桁表示なので、8桁ないとNG)
-			if (String.valueOf(outputplanday).length() != 8 ) {
+			if (outputplanday.length() != 8 ) {
 				System.out.println("日付の値が不正です");
 				break;
 			}
@@ -119,7 +119,7 @@ public class Outputplan {
 		
 	    stmt2.setInt(ITEMID, outputitemid);
 	    stmt2.setInt(ITEMS, outputitems);
-	    stmt2.setInt(PLANDAY, outputplanday);
+	    stmt2.setString(PLANDAY, outputplanday);
 	    stmt2.setString(CODE, outputcode);
 	    stmt2.setInt(STATUS, 0);
 	    stmt2.executeUpdate();
