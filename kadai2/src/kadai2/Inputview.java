@@ -1,5 +1,5 @@
 /**
- * 
+ * Inputview未実装
  */
 package kadai2;
 
@@ -8,7 +8,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Inputview {
+public class Inputview { //未実装
 	private Connection conn =null;
 	
 	public Inputview(String URL) throws SQLException {	

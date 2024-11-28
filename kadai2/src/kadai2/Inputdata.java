@@ -1,22 +1,26 @@
 package kadai2;
 import java.sql.*;
 
-public class Inputdata extends Parcheak {
+public class Inputdata {
+	
 	private Connection conn =null;
-
 	private String inputcode; //予約コード
 	
+	//SQL接続
 	public Inputdata(String URL) throws SQLException {	
 		conn = DriverManager.getConnection(URL);
 	}
 	
+	//パラメータ確認
 	public boolean parcheak(String[] args) throws SQLException {
 		boolean parflag = false;
 		final int CODECOUNT = 8; //予約コードの文字数
 		final int ARGSCOUNT = 2; //argsの数
+		final String mode = "input";//ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(inputplanとinputcodeを作成する)
+		Parcheak PC = new Parcheak();
 		
 		for (;;) {
-			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+			if (PC.argcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
@@ -25,12 +29,17 @@ public class Inputdata extends Parcheak {
 			inputcode =args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			if (super.Parcheak(inputcode, CODECOUNT) ==false) {
+			if (PC.codecheak(inputcode, CODECOUNT) ==false) {
 				break;
 			}
 			
-			//予約コードの存在確認(inputplanデータ内で存在しなかったらNG)
-			if (codecheak(inputcode) != false) {
+			//予約コードの存在確認(inputplanデータ内で存在しなかったら(=重複しなかったら)NG)
+			/*if (codecheak(inputcode) == false) {
+			System.out.println("予約コードが重複しています");
+    		break;
+			}*/
+			
+			if(PC.dupcodecheak(inputcode, conn, mode) == true) {
 				System.out.println("予約コードが存在しません");
 	    		break;
 			}
@@ -104,8 +113,8 @@ public class Inputdata extends Parcheak {
 				
 				//在庫一覧を更新するSQL
 				String sql4 ="replace into stock (itemid,stockitems) "
-						+ "select itemid,sum(items) where itemid != 0 "
-						+ "from rack group by itemid";
+						+ "select itemid,sum(items) from rack "
+						+ "where itemid != 0 group by itemid";
 				
 				//在庫一覧を更新
 				PreparedStatement stmt4 = conn.prepareStatement(sql4);
@@ -138,10 +147,10 @@ public class Inputdata extends Parcheak {
         }	
 	}
 	
-	//予約コード存在確認
-	private boolean codecheak(String code) throws SQLException{
+	//予約コード存在確認(Parcheakクラスで実装済み)
+	/*private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
-		String sql = "SELECT * FROM inputplan WHERE inputcode = ?";
+		String sql = "select * from inputplan where inputcode = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		
 		stmt.setString(1,code);
@@ -154,7 +163,7 @@ public class Inputdata extends Parcheak {
 		rs.close();
 		stmt.close();
 		return codeflag;
-	}
+	}*/
 	
 	//入荷状況確認
 	private boolean statuscheak(String code)throws SQLException{

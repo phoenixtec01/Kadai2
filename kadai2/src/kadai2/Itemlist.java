@@ -22,21 +22,22 @@ public class Itemlist {
     	を出力
 	*/
 	public void views() throws SQLException{ //外部結合で他テーブルの内容を結合する。このとき、Nullの場合は0を入力する。
-		String sql1 = "replace into itemlist(itemid,itemname,inputitems,outputitems,stockitems,reserveitems) "
+		String sql1 = "replace into itemlist(itemid,itemname,inputitems,outputitems,stockitems,reserveitems) " //アイテムリストを更新
 				+ "select master.itemid,master.itemname,ifnull(inputplan.inputitems,0),ifnull(outputplan.outputitems,0),"
-				+ "ifnull(stock.stockitems,0),ifnull(stock.stockitems - outputplan.outputitems,0) from master "
-				+ "left outer join inputplan on master.itemid = inputplan.itemid and inputplan.inputstatus = 0 "
-				+ "left outer join outputplan on master.itemid = outputplan.itemid and outputplan.outputstatus = 0 "
-				+ "left outer join stock on master.itemid = stock.itemid";
+				+ "ifnull(stock.stockitems,0),ifnull(stock.stockitems - outputplan.outputitems,0) from master "//別々のテーブルからデータを読み込む
+				+ "left outer join inputplan on master.itemid = inputplan.itemid and inputplan.inputstatus = 0 "//外的結合でinputplanテーブルを結合
+				+ "left outer join outputplan on master.itemid = outputplan.itemid and outputplan.outputstatus = 0 "//外的結合でoutputplanテーブルを結合
+				+ "left outer join stock on master.itemid = stock.itemid";//外的結合でstockテーブルを結合
 		
 		PreparedStatement stmt1 = conn.prepareStatement(sql1);
 	    stmt1.executeUpdate();
 		stmt1.close();
 		
-		String sql1_1 = "select * from itemlist order by itemid asc";
+		String sql1_1 = "select * from itemlist order by itemid asc";//商品コード順に表示
 		PreparedStatement stmt1_1 = conn.prepareStatement(sql1_1);
 		ResultSet rs1_1 = stmt1_1.executeQuery();
 		
+		//テーブルデータを出力
 		System.out.println("----------------------------------------------------------------");
 		System.out.println("|itemid|itemname|inputitems|outputitems|stockitems|reserveitems|");
 		System.out.println("----------------------------------------------------------------");

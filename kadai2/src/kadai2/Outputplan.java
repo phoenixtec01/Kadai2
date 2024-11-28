@@ -6,7 +6,8 @@ import java.sql.*;
 /**
  * 
  */
-public class Outputplan extends Parcheak {
+public class Outputplan {
+	
 	private Connection conn =null;
 	private int outputitemid; //商品コード
 	private int outputitems; //予定数
@@ -23,6 +24,8 @@ public class Outputplan extends Parcheak {
 		boolean parflag = false;
 		final int CODECOUNT = 8; //予約コードの文字数
 		final int ARGSCOUNT = 5; //argsの数
+		Parcheak PC = new Parcheak();
+		final String mode = "output";//ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(outputplanとoutputcodeを作成する)
 		
 		for (;;) {
 			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
@@ -30,7 +33,7 @@ public class Outputplan extends Parcheak {
 				break;
 			}*/
 			
-			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+			if (PC.argcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
@@ -49,23 +52,27 @@ public class Outputplan extends Parcheak {
 				break;
 			}*/
 			
-			if (super.Parcheak(outputcode, CODECOUNT) ==false) {
+			if (PC.codecheak(outputcode, CODECOUNT) ==false) {
 				break;
 			}
 
 			//商品コードの内容チェック(商品コードが登録されていない商品や商品コードが0の場合はNG)
-			if (itemcheak(outputitemid) ==false || outputitemid ==0) {
+			/*if (itemcheak(outputitemid) ==false || outputitemid ==0) {
+				System.out.println("商品コードの値が不正です");
+				break;
+			}*/
+			
+			if(PC.itemidcheak(outputitemid, conn) == false || outputitemid ==0) {
 				System.out.println("商品コードの値が不正です");
 				break;
 			}
-			
 			//予定数の内容チェック(予定数は1以上なので、0未満はNG)
 			/*if (outputitems < 1) {
 				System.out.println("予定数の値が不正です");
 				break;
 			}*/
 			
-			if (super.Parcheak(outputitems) ==false) {
+			if (PC.itemcheak(outputitems) ==false) {
 				break;
 			}
 			
@@ -75,12 +82,17 @@ public class Outputplan extends Parcheak {
 				break;
 			}*/
 			
-			if (super.Parcheak(outputplanday) ==false) {
+			if (PC.daycheak(outputplanday) ==false) {
 				break;
 			}
 			
 			//予約コードの重複確認(outputplanデータ内で重複したらNG)
-			if (codecheak(outputcode) == false) {
+			/*if (codecheak(outputcode) == false) {
+				System.out.println("予約コードが重複しています");
+	    		break;
+			}*/
+			
+			if(PC.dupcodecheak(outputcode, conn, mode) == false) {
 				System.out.println("予約コードが重複しています");
 	    		break;
 			}
@@ -90,28 +102,29 @@ public class Outputplan extends Parcheak {
 		}
 		return parflag;
 	}
-	//商品コードチェック
-		private boolean itemcheak(int id) throws SQLException{
-			boolean itemflag = false;
+	//商品コードチェック(Parcheakクラスで実装済み)
+	/*private boolean itemcheak(int id) throws SQLException{
+		boolean itemflag = false;
 
-			String sql0 = " select itemid from master where itemid = ?";
-			PreparedStatement stmt0 = conn.prepareStatement(sql0);
-			
-			stmt0.setInt(1,id);
-			ResultSet rs0 = stmt0.executeQuery();
-			
-			if (rs0.getString("itemid") != null) {//商品コードが存在しなかったらしてなかったらnullを返す
-				itemflag = true;
-			}else {
-				itemflag = false;
-			}
-			
-			return itemflag;
+		String sql0 = " select itemid from master where itemid = ?";
+		PreparedStatement stmt0 = conn.prepareStatement(sql0);
+		
+		stmt0.setInt(1,id);
+		ResultSet rs0 = stmt0.executeQuery();
+		
+		if (rs0.getString("itemid") != null) {//商品コードが存在しなかったらしてなかったらnullを返す
+			itemflag = true;
+		}else {
+			itemflag = false;
 		}
-	//予約コード重複確認
-	private boolean codecheak(String code) throws SQLException{
+		
+		return itemflag;
+	}*/
+		
+	//予約コード重複確認(Parcheakクラスで実装済み)
+	/*private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
-		String sql = "SELECT * FROM outputplan WHERE outputcode = ?";
+		String sql = "select * from outputplan where outputcode = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		
 		stmt.setString(1,code);
@@ -124,7 +137,7 @@ public class Outputplan extends Parcheak {
 		rs.close();
 		stmt.close();
 		return codeflag;
-	}
+	}*/
 	
 	//データ記入
 	public void datainput() throws SQLException {

@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Stockview extends Parcheak{
+public class Stockview{
 	private Connection conn =null;
 	
 	public Stockview(String URL) throws SQLException {	
@@ -16,14 +16,14 @@ public class Stockview extends Parcheak{
 		boolean parflag = false;
 
 		final int ARGSCOUNT = 2; //argsの数
-		
+		Parcheak PC = new Parcheak();
 		for (;;) {
 			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
 				System.out.println("パラメータの数があっていません");
 				break;
 			}*/
 			
-			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+			if (PC.argcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
@@ -37,8 +37,8 @@ public class Stockview extends Parcheak{
 		
 		//在庫一覧を更新するSQL
 		String sql1 ="replace into stock (itemid,stockitems) "
-				+ "select itemid,sum(items) where itemid != 0 "
-				+ "from rack group by itemid";
+				+ "select itemid,sum(items) from rack "
+				+ "where itemid != 0 group by itemid";
 		
 		//在庫一覧を更新
 		PreparedStatement stmt1 = conn.prepareStatement(sql1);
@@ -46,7 +46,7 @@ public class Stockview extends Parcheak{
 		stmt1.close();
 		
 		switch (args[1]) {
-		case "rack" :
+		case "rack" ://棚番号基準
 		
 			//在庫一覧データを作成するSQL（棚番号基準）
 			String sql2 = "replace into stocklist (rackid,itemname,items) "
@@ -57,6 +57,7 @@ public class Stockview extends Parcheak{
 		    stmt2.executeUpdate();
 			stmt2.close();
 			
+			//テーブルデータを出力
 			String sql2_1 = "select * from stocklist order by rackid asc";
 			PreparedStatement stmt2_1 = conn.prepareStatement(sql2_1);
 			ResultSet rs2_1 = stmt2_1.executeQuery();
@@ -72,7 +73,7 @@ public class Stockview extends Parcheak{
 			
 			break;
 		
-		case "item" :
+		case "item" ://商品コード基準
 		
 			//在庫一覧データを作成するSQL（商品ID基準）
 			String sql3 = "replace into stocklist2 (itemid,itemname,items) "
@@ -83,7 +84,8 @@ public class Stockview extends Parcheak{
 		    stmt3.executeUpdate();
 			stmt3.close();
 			
-			String sql3_1 = "select * from stocklist2 order by itemid asc";
+			//テーブルデータを出力
+			String sql3_1 = "select * from stocklist2 where itemid != 0 order by itemid asc";
 			PreparedStatement stmt3_1 = conn.prepareStatement(sql3_1);
 			ResultSet rs3_1 = stmt3_1.executeQuery();
 			
@@ -97,6 +99,7 @@ public class Stockview extends Parcheak{
 			stmt3_1.close();
 			break;
 		
+		//条件未ならエラー
 		default :
 			System.out.println("コマンドライン引数があってません(\"rack\" or \"item\")");
 			break;

@@ -6,19 +6,23 @@ import java.sql.*;
 /**
  * 
  */
-public class Outputdata extends Parcheak{ 
+public class Outputdata { 
+	
 	private Connection conn =null;
-
 	private String outputcode; //予約コード
 	
+	//SQL接続
 	public Outputdata(String URL) throws SQLException {	
 		conn = DriverManager.getConnection(URL);
 	}
 	
+	//パラメータ確認
 	public boolean parcheak(String[] args) throws SQLException {
 		boolean parflag = false;
 		final int CODECOUNT = 8; //予約コードの文字数
 		final int ARGSCOUNT = 2; //argsの数
+		Parcheak PC = new Parcheak();
+		final String mode = "output";//ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(outputplanとoutputcodeを作成する)
 		
 		for (;;) {
 			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
@@ -26,10 +30,9 @@ public class Outputdata extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+			if (PC.argcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
-			
 			
 			//パラメータの内容を格納
 			int index = 1;
@@ -41,12 +44,17 @@ public class Outputdata extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(outputcode, CODECOUNT) ==false) {
+			if (PC.codecheak(outputcode, CODECOUNT) ==false) {
 				break;
 			}
 			
 			//予約コードの存在確認(outputplanデータ内で存在しなかったらNG)
-			if (codecheak(outputcode) != false) {
+			/*if (codecheak(outputcode) != false) {
+				System.out.println("予約コードが存在しません");
+	    		break;
+			}*/
+			
+			if(PC.dupcodecheak(outputcode, conn, mode) == true) {
 				System.out.println("予約コードが存在しません");
 	    		break;
 			}
@@ -175,8 +183,8 @@ public class Outputdata extends Parcheak{
 				
 				//在庫一覧を更新するSQL
 				String sql4 ="replace into stock (itemid,stockitems) "
-						+ "select itemid,sum(items) where itemid != 0 "
-						+ "from rack group by itemid";
+						+ "select itemid,sum(items) from rack "
+						+ "where itemid != 0 group by itemid";
 				
 				//在庫一覧を更新
 				PreparedStatement stmt4 = conn.prepareStatement(sql4);
@@ -192,7 +200,6 @@ public class Outputdata extends Parcheak{
 				int rowCount2 = 0;
 				while (rs5.next()) {
 				    rowCount2++;
-				    //System.out.println(rs5.getInt("rackid"));
 				}
 				rs5.close();
 				
@@ -208,7 +215,6 @@ public class Outputdata extends Parcheak{
 				ResultSet rs5_1 = stmt5.executeQuery();
 				while (rs5_1.next()) {
 					resetid[k] = rs5_1.getInt("rackid");
-					//System.out.println(resetid[k]);
 					k++;
 				}
 				rs5_1.close();
@@ -256,10 +262,10 @@ public class Outputdata extends Parcheak{
 	    }	
 	}
 	
-	//予約コード存在確認
-	private boolean codecheak(String code) throws SQLException{
+	//予約コード存在確認(Parcheakクラスで実装済み)
+	/*private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
-		String sql = "SELECT * FROM outputplan WHERE outputcode = ?";
+		String sql = "select * from outputplan where outputcode = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		
 		stmt.setString(1,code);
@@ -272,7 +278,7 @@ public class Outputdata extends Parcheak{
 		rs.close();
 		stmt.close();
 		return codeflag;
-	}
+	}*/
 	
 	//出荷状況確認
 	private boolean statuscheak(String code)throws SQLException{

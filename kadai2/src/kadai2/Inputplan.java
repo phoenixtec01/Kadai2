@@ -1,9 +1,8 @@
 package kadai2;
 import java.sql.*;
 
-public class Inputplan extends Parcheak{
+public class Inputplan{
 
-	//private final String SQL = "select * from employee where id =? ;";
 	private Connection conn =null;
 	private int inputitemid; //商品コード
 	private int inputitems; //予定数
@@ -12,8 +11,7 @@ public class Inputplan extends Parcheak{
 	
 	//SQL接続
 	public Inputplan(String URL) throws SQLException {	
-		conn = DriverManager.getConnection(URL);
-		
+		conn = DriverManager.getConnection(URL);	
 	}
 	
 	//パラメータ確認
@@ -21,7 +19,9 @@ public class Inputplan extends Parcheak{
 		boolean parflag = false;
 		final int ARGSCOUNT = 5; //argsの数
 		final int CODECOUNT = 8; //予約コードの文字数
-
+		final String mode = "input"; //ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(inputplanとinputcodeを作成する)
+		
+		Parcheak PC = new Parcheak();
 		
 		for (;;) {
 			//パラメータの数をカウント(１つはサブコマンドで確定)
@@ -30,7 +30,8 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+			if (PC.argcheak(args,ARGSCOUNT) ==false) {
+				System.out.println("パラメータの数があっていません");
 				break;
 			}
 			
@@ -47,12 +48,18 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(inputcode, CODECOUNT) ==false) {
+			if (PC.codecheak(inputcode, CODECOUNT) ==false) {
+				System.out.println("予約コードが8桁ではありません");
 				break;
 			}
 			
 			//商品コードの内容チェック(商品コードが登録されていない商品や商品コードが0の場合はNG)
-			if (itemcheak(inputitemid) ==false || inputitemid ==0) {
+			/*if (itemcheak(inputitemid) ==false || inputitemid ==0) {
+				System.out.println("商品コードの値が不正です");
+				break;
+			}*/
+			
+			if(PC.itemidcheak(inputitemid, conn) == false || inputitemid ==0) {
 				System.out.println("商品コードの値が不正です");
 				break;
 			}
@@ -63,7 +70,8 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(inputitems) ==false) {
+			if (PC.itemcheak(inputitems) ==false) {
+				System.out.println("予定数の値が不正です");
 				break;
 			}
 
@@ -73,12 +81,18 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			if (super.Parcheak(inputplanday) ==false) {
+			if (PC.daycheak(inputplanday) ==false) {
+				System.out.println("日付の値が不正です");
 				break;
 			}
 			
-			//予約コードの重複確認(inputplanデータ内で重複したらNG)
-			if (codecheak(inputcode) == false) {
+			//予約コードの重複確認(inputplanデータ内で重複していたらNG)
+			/*if (codecheak(inputcode) == false) {
+				System.out.println("予約コードが重複しています");
+	    		break;
+			}*/
+			
+			if(PC.dupcodecheak(inputcode, conn, mode) == false) {
 				System.out.println("予約コードが重複しています");
 	    		break;
 			}
@@ -90,10 +104,10 @@ public class Inputplan extends Parcheak{
 	}
 	
 
-	//予約コード重複確認
-	private boolean codecheak(String code) throws SQLException{
+	//予約コード重複確認(Parcheakクラスで実装済み)
+	/*private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
-		String sql = "SELECT * FROM inputplan WHERE inputcode = ?";
+		String sql = "select * from inputplan where inputcode = ?";
 		PreparedStatement stmt = conn.prepareStatement(sql);
 		
 		stmt.setString(1,code);
@@ -106,10 +120,10 @@ public class Inputplan extends Parcheak{
 		rs.close();
 		stmt.close();
 		return codeflag;
-	}
+	}*/
 	
-	//商品コードチェック
-	private boolean itemcheak(int id) throws SQLException{
+	//商品コードチェック(Parcheakクラスで実装済み)
+	/*private boolean itemcheak(int id) throws SQLException{
 		boolean itemflag = false;
 
 		String sql0 = " select itemid from master where itemid = ?";
@@ -125,7 +139,7 @@ public class Inputplan extends Parcheak{
 		}
 		
 		return itemflag;
-	}
+	}*/
 	
 	//データ記入
 	public void datainput() throws SQLException {
@@ -149,7 +163,8 @@ public class Inputplan extends Parcheak{
        
 	}
 	
-	/* public void listinput () throws SQLException {
+	 /*InputList、未実装
+	  	public void listinput () throws SQLException {
         String sql3_1 ="into inputlist2 (itemid,inputitems,inputplanday,inputcode,inputstatus) select itemid,inputitems,inputplanday,inputcode,inputstatus from inputplan";
         String sql3_2 ="select max(version) from inputlist2";
         String sql3_3 ="update inputlist2 set version = ? where version is 0";
