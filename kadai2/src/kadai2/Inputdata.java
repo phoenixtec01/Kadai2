@@ -1,7 +1,7 @@
 package kadai2;
 import java.sql.*;
 
-public class Inputdata {
+public class Inputdata extends Parcheak {
 	private Connection conn =null;
 
 	private String inputcode; //予約コード
@@ -16,8 +16,7 @@ public class Inputdata {
 		final int ARGSCOUNT = 2; //argsの数
 		
 		for (;;) {
-			if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
-				System.out.println("パラメータの数があっていません");
+			if (super.Parcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
@@ -26,8 +25,7 @@ public class Inputdata {
 			inputcode =args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			if (inputcode.length() != CODECOUNT) {
-				System.out.println("予約コードが8桁ではありません");
+			if (super.Parcheak(inputcode, CODECOUNT) ==false) {
 				break;
 			}
 			

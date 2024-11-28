@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Outputdata { 
+public class Outputdata extends Parcheak{ 
 	private Connection conn =null;
 
 	private String outputcode; //予約コード
@@ -21,18 +21,27 @@ public class Outputdata {
 		final int ARGSCOUNT = 2; //argsの数
 		
 		for (;;) {
-			if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
+			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
 				System.out.println("パラメータの数があっていません");
 				break;
+			}*/
+			
+			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+				break;
 			}
+			
 			
 			//パラメータの内容を格納
 			int index = 1;
 			outputcode =args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			if (outputcode.length() != CODECOUNT) {
+			/*if (outputcode.length() != CODECOUNT) {
 				System.out.println("予約コードが8桁ではありません");
+				break;
+			}*/
+			
+			if (super.Parcheak(outputcode, CODECOUNT) ==false) {
 				break;
 			}
 			

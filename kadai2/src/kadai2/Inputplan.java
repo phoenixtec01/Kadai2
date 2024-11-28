@@ -19,8 +19,9 @@ public class Inputplan extends Parcheak{
 	//パラメータ確認
 	public boolean Parcheak(String[] args) throws SQLException {
 		boolean parflag = false;
-		final int CODECOUNT = 8; //予約コードの文字数
 		final int ARGSCOUNT = 5; //argsの数
+		final int CODECOUNT = 8; //予約コードの文字数
+
 		
 		for (;;) {
 			//パラメータの数をカウント(１つはサブコマンドで確定)
@@ -29,8 +30,7 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			boolean argflag =super.Parcheak(args,ARGSCOUNT);
-			if (argflag ==false) {
+			if (super.Parcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
@@ -47,10 +47,10 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			boolean codeflag = super.Parcheak(inputcode, CODECOUNT);
-			if (codeflag ==false) {
+			if (super.Parcheak(inputcode, CODECOUNT) ==false) {
 				break;
 			}
+			
 			//商品コードの内容チェック(商品コードが登録されていない商品や商品コードが0の場合はNG)
 			if (itemcheak(inputitemid) ==false || inputitemid ==0) {
 				System.out.println("商品コードの値が不正です");
@@ -63,8 +63,7 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			boolean itemflag = super.Parcheak(inputitems);
-			if (itemflag ==false) {
+			if (super.Parcheak(inputitems) ==false) {
 				break;
 			}
 
@@ -74,8 +73,7 @@ public class Inputplan extends Parcheak{
 				break;
 			}*/
 			
-			boolean dayflag = super.Parcheak(inputplanday);
-			if (dayflag ==false) {
+			if (super.Parcheak(inputplanday) ==false) {
 				break;
 			}
 			

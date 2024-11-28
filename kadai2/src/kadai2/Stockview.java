@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Stockview {
+public class Stockview extends Parcheak{
 	private Connection conn =null;
 	
 	public Stockview(String URL) throws SQLException {	
@@ -18,10 +18,15 @@ public class Stockview {
 		final int ARGSCOUNT = 2; //argsの数
 		
 		for (;;) {
-			if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
+			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
 				System.out.println("パラメータの数があっていません");
 				break;
+			}*/
+			
+			if (super.Parcheak(args,ARGSCOUNT) ==false) {
+				break;
 			}
+			
 			parflag = true;
 			break;
 		}

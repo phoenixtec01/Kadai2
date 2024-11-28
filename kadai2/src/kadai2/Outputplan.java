@@ -6,7 +6,7 @@ import java.sql.*;
 /**
  * 
  */
-public class Outputplan {
+public class Outputplan extends Parcheak {
 	private Connection conn =null;
 	private int outputitemid; //商品コード
 	private int outputitems; //予定数
@@ -25,11 +25,16 @@ public class Outputplan {
 		final int ARGSCOUNT = 5; //argsの数
 		
 		for (;;) {
-			if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
+			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
 				System.out.println("パラメータの数があっていません");
+				break;
+			}*/
+			
+			if (super.Parcheak(args,ARGSCOUNT) ==false) {
 				break;
 			}
 			
+
 			//パラメータの内容を格納
 			int index = 1;
 			outputcode =args[index++];
@@ -38,8 +43,13 @@ public class Outputplan {
 			outputplanday = args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			if (outputcode.length() != CODECOUNT) {
+			
+			/*if (outputcode.length() != CODECOUNT) {
 				System.out.println("予約コードが8桁ではありません");
+				break;
+			}*/
+			
+			if (super.Parcheak(outputcode, CODECOUNT) ==false) {
 				break;
 			}
 
@@ -50,13 +60,22 @@ public class Outputplan {
 			}
 			
 			//予定数の内容チェック(予定数は1以上なので、0未満はNG)
-			if (outputitems < 1) {
+			/*if (outputitems < 1) {
 				System.out.println("予定数の値が不正です");
 				break;
+			}*/
+			
+			if (super.Parcheak(outputitems) ==false) {
+				break;
 			}
+			
 			//日付の内容チェック(日付は8桁表示なので、8桁ないとNG)
-			if (outputplanday.length() != 8 ) {
+			/*if (outputplanday.length() != 8 ) {
 				System.out.println("日付の値が不正です");
+				break;
+			}*/
+			
+			if (super.Parcheak(outputplanday) ==false) {
 				break;
 			}
 			
