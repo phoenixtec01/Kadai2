@@ -1,43 +1,43 @@
-/**
- * 
- */
+
 package kadai2;
 import java.sql.*;
-/**
- * 
- */
+
 public class Outputplan {
 	
 	private Connection conn =null;
-	private int outputitemid; //商品コード
-	private int outputitems; //予定数
-	private String outputplanday; //予定日
-	private String outputcode; //予約コード
+	private int outputitemid; 		//商品コード
+	private int outputitems; 		//予定数
+	private String outputplanday; 	//予定日
+	private String outputcode; 		//予約コード
 	
 	//SQL接続
 	public Outputplan(String URL) throws SQLException {	
 		conn = DriverManager.getConnection(URL);
 	}
 	
-	//パラメータ確認
+	//パラメータ確認(返り値はパラメータチェックフラグ)
 	public boolean parcheak(String[] args) throws SQLException {
-		boolean parflag = false;
-		final int CODECOUNT = 8; //予約コードの文字数
-		final int ARGSCOUNT = 5; //argsの数
+		
+		boolean parflag = false; 		//パラメータチェックフラグ(すべて問題ければ"True")
+		final int ARGSCOUNT = 5; 		//argsの数
+		final int CODECOUNT = 8; 		//予約コードの文字数
+		final String mode = "output";	/*ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分
+										(単語"outputplan"と"outputcode"を作成する際に必要)*/
+		
 		Parcheak PC = new Parcheak();
-		final String mode = "output";//ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(outputplanとoutputcodeを作成する)
 		
 		for (;;) {
-			/*if (args.length != ARGSCOUNT) {	//パラメータの数をカウント(１つはサブコマンドで確定)
+			//パラメータの数を確認(１つはサブコマンドで確定、あってなければNG)
+			/*if (args.length != ARGSCOUNT) {	
 				System.out.println("パラメータの数があっていません");
 				break;
 			}*/
 			
 			if (PC.argcheak(args,ARGSCOUNT) ==false) {
+				System.out.println("パラメータの数があっていません。(サブコマンド込みで" + ARGSCOUNT +"つ必要です)");
 				break;
 			}
 			
-
 			//パラメータの内容を格納
 			int index = 1;
 			outputcode =args[index++];
@@ -46,13 +46,13 @@ public class Outputplan {
 			outputplanday = args[index++];
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
-			
 			/*if (outputcode.length() != CODECOUNT) {
 				System.out.println("予約コードが8桁ではありません");
 				break;
 			}*/
 			
 			if (PC.codecheak(outputcode, CODECOUNT) ==false) {
+				System.out.println("予約コードが8桁ではありません");
 				break;
 			}
 
@@ -66,6 +66,7 @@ public class Outputplan {
 				System.out.println("商品コードの値が不正です");
 				break;
 			}
+			
 			//予定数の内容チェック(予定数は1以上なので、0未満はNG)
 			/*if (outputitems < 1) {
 				System.out.println("予定数の値が不正です");
@@ -73,6 +74,7 @@ public class Outputplan {
 			}*/
 			
 			if (PC.itemcheak(outputitems) ==false) {
+				System.out.println("予定数の値が不正です");
 				break;
 			}
 			
@@ -83,6 +85,7 @@ public class Outputplan {
 			}*/
 			
 			if (PC.daycheak(outputplanday) ==false) {
+				System.out.println("日付の値が不正です");
 				break;
 			}
 			
@@ -97,7 +100,7 @@ public class Outputplan {
 	    		break;
 			}
 			
-			parflag = true;
+			parflag = true; //全パラメータが問題なければパラメータフラグをTrueにする
 			break;
 		}
 		return parflag;
@@ -110,7 +113,9 @@ public class Outputplan {
 		final int PLANDAY = 3;
 		final int CODE = 4;
 		final int STATUS = 5;
-		String sql2 = "INSERT INTO outputplan VALUES( ?, ?, ?, ?, ?) "; //データ記入SQL
+		
+		//データを記入するSQL文
+		String sql2 = "insert into outputplan values( ?, ?, ?, ?, ?) ";
 		PreparedStatement stmt2 = conn.prepareStatement(sql2);
 		
 	    stmt2.setInt(ITEMID, outputitemid);

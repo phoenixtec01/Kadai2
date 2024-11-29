@@ -1,37 +1,40 @@
+
 package kadai2;
 import java.sql.*;
 
 public class Inputplan{
 
 	private Connection conn =null;
-	private int inputitemid; //商品コード
-	private int inputitems; //予定数
-	private String inputplanday; //予定日
-	private String inputcode; //予約コード
+	private int inputitemid; 		//商品コード
+	private int inputitems; 		//予定数
+	private String inputplanday; 	//予定日
+	private String inputcode; 		//予約コード
 	
 	//SQL接続
 	public Inputplan(String URL) throws SQLException {	
 		conn = DriverManager.getConnection(URL);	
 	}
 	
-	//パラメータ確認
-	public boolean Parcheak(String[] args) throws SQLException {
-		boolean parflag = false;
-		final int ARGSCOUNT = 5; //argsの数
-		final int CODECOUNT = 8; //予約コードの文字数
-		final String mode = "input"; //ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(inputplanとinputcodeを作成する)
+	//パラメータ確認(返り値はパラメータチェックフラグ)
+	public boolean parcheak(String[] args) throws SQLException {
+		
+		boolean parflag = false; 		//パラメータチェックフラグ(すべて問題ければ"True")
+		final int ARGSCOUNT = 5; 		//argsの数
+		final int CODECOUNT = 8; 		//予約コードの文字数
+		final String mode = "input";	/*ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分
+										(単語"inputplan"と"inputcode"を作成する際に必要)*/
 		
 		Parcheak PC = new Parcheak();
 		
 		for (;;) {
-			//パラメータの数をカウント(１つはサブコマンドで確定)
+			//パラメータの数を確認(１つはサブコマンドで確定、あってなければNG)
 			/*if (args.length != ARGSCOUNT) {	
 				System.out.println("パラメータの数があっていません");
 				break;
 			}*/
 			
 			if (PC.argcheak(args,ARGSCOUNT) ==false) {
-				System.out.println("パラメータの数があっていません");
+				System.out.println("パラメータの数があっていません。(サブコマンド込みで" + ARGSCOUNT +"つ必要です)");
 				break;
 			}
 			
@@ -97,7 +100,7 @@ public class Inputplan{
 	    		break;
 			}
 			
-			parflag = true;
+			parflag = true; //全パラメータが問題なければパラメータフラグをTrueにする
 			break;
 		}
 		return parflag;
@@ -105,12 +108,15 @@ public class Inputplan{
 	
 	//データ記入
 	public void datainput() throws SQLException {
+		
 		final int ITEMID = 1; 
 		final int ITEMS = 2;
 		final int PLANDAY = 3;
 		final int CODE = 4;
 		final int STATUS = 5;
-		String sql2 = "INSERT INTO inputplan VALUES( ?, ?, ?, ?, ?) "; //データ記入SQL
+		
+		//データを記入するSQL文
+		String sql2 = "insert into inputplan values( ?, ?, ?, ?, ?) ";
 		PreparedStatement stmt2 = conn.prepareStatement(sql2);
 		
 	    stmt2.setInt(ITEMID, inputitemid);
@@ -191,7 +197,6 @@ public class Inputplan{
                 }
             }
         }
- 	
 	}*/
 	
 	//SQL切断

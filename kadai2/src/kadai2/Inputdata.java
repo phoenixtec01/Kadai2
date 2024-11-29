@@ -1,3 +1,4 @@
+
 package kadai2;
 import java.sql.*;
 
@@ -11,16 +12,26 @@ public class Inputdata {
 		conn = DriverManager.getConnection(URL);
 	}
 	
-	//パラメータ確認
+	//パラメータ確認(返り値はパラメータチェックフラグ)
 	public boolean parcheak(String[] args) throws SQLException {
-		boolean parflag = false;
-		final int CODECOUNT = 8; //予約コードの文字数
-		final int ARGSCOUNT = 2; //argsの数
-		final String mode = "input";//ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分(inputplanとinputcodeを作成する)
+		
+		boolean parflag = false; 		//パラメータチェックフラグ(すべて問題ければ"True")
+		final int CODECOUNT = 8; 		//予約コードの文字数
+		final int ARGSCOUNT = 2; 		//argsの数
+		final String mode = "input";	/*ParcheakクラスでSQL文を作成する際に使用する構成文の差異部分
+										(単語"inputplan"と"inputcode"と"inputstatus"を作成する際に必要)*/
+		
 		Parcheak PC = new Parcheak();
 		
 		for (;;) {
+			//パラメータの数を確認(１つはサブコマンドで確定、あってなければNG)
+			/*if (args.length != ARGSCOUNT) {	
+			System.out.println("パラメータの数があっていません");
+			break;
+			}*/
+			
 			if (PC.argcheak(args,ARGSCOUNT) ==false) {
+				System.out.println("パラメータの数があっていません。(サブコマンド込みで" + ARGSCOUNT +"つ必要です)");
 				break;
 			}
 			
@@ -30,16 +41,17 @@ public class Inputdata {
 						
 			//予約コードの内容チェック(予約コードは8文字なので、予約コードが8文字ないとNG)
 			if (PC.codecheak(inputcode, CODECOUNT) ==false) {
+				System.out.println("予約コードが8桁ではありません");
 				break;
 			}
 			
 			//予約コードの存在確認(inputplanデータ内で存在しなかったら(=重複しなかったら)NG)
 			/*if (codecheak(inputcode) == false) {
-			System.out.println("予約コードが重複しています");
+				System.out.println("予約コードが存在しません");
     		break;
 			}*/
 			
-			if(PC.dupcodecheak(inputcode, conn, mode) == true) {
+			if(PC.dupcodecheak(inputcode, conn, mode) == true) {//dupcodecheakメソッドがコード重複時にFalseを返すメソッドのため、Trueを返すと重複しない=存在しない判定になる
 				System.out.println("予約コードが存在しません");
 	    		break;
 			}
@@ -54,17 +66,20 @@ public class Inputdata {
 				System.out.println("既に入荷済みです");
 	    		break;
 			}
-			parflag = true;
+			parflag = true; //全パラメータが問題なければパラメータフラグをTrueにする
 			break;
 		}
 		return parflag;
 	}
 	
+	//データ記入
 	public void datainput() throws SQLException {
-		int rackid;
+		
+		int rackid;	//棚番号
 		final int RACKID = 1; 
 		final int STATUS = 1;
 		final int CODE = 2;
+		
 		try {
 			conn.setAutoCommit(false); //テーブル自動更新を停止
 		
@@ -86,15 +101,16 @@ public class Inputdata {
 					break;
 				}
 				
-				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れるSQL
-				String sql2 ="update rack set "
-						+ "itemid = inputplan.itemid," //棚の商品コードは入荷予定データの商品コード
-						+ "items = inputplan.inputitems," //棚の商品数は入荷予定データの入荷予定数
-						+ "inputday = inputplan.inputplanday " //棚の入荷日は入荷予定データの入荷予定日
-						+ "from inputplan where " //データを入れる条件は
-						+ "rack.rackid = ? " //入力位置は棚番号の空き位置であること
-						+ "and inputplan.inputcode = ? " //予約番号が同じであること
-						+ "and inputplan.inputstatus = 0;"; //商品が未入荷状態であること
+				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れるSQL文
+				String sql2 = "update rack set "
+							+ "itemid = inputplan.itemid," 			//棚の商品コードは入荷予定データの商品コード
+							+ "items = inputplan.inputitems," 		//棚の商品数は入荷予定データの入荷予定数
+							+ "inputday = inputplan.inputplanday " 	//棚の入荷日は入荷予定データの入荷予定日
+							
+							+ "from inputplan where " 				//データを入れる条件を指定
+							+ "rack.rackid = ? " 					//入力位置は棚番号の空き位置であること
+							+ "and inputplan.inputcode = ? " 		//予約番号が同じであること
+							+ "and inputplan.inputstatus = 0;"; 	//商品が未入荷状態であること
 				
 				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れる
 				PreparedStatement stmt2 = conn.prepareStatement(sql2);
@@ -103,7 +119,7 @@ public class Inputdata {
 			    stmt2.executeUpdate();
 				stmt2.close();
 				
-				//入荷後に入荷予定データの入荷済みフラグをオンにするSQL
+				//入荷後に入荷予定データの入荷済みフラグをオンにするSQL文
 				String sql3 = "update inputplan set inputstatus = ? where inputcode = ? ";
 				
 				//入荷後に入荷予定データの入荷済みフラグをオンにする
@@ -114,10 +130,10 @@ public class Inputdata {
 				stmt3.close();
 				
 				
-				//在庫一覧を更新するSQL
-				String sql4 ="replace into stock (itemid,stockitems) "
-						+ "select itemid,sum(items) from rack "
-						+ "where itemid != 0 group by itemid";
+				//在庫一覧を更新するSQL文
+				String sql4 = "replace into stock (itemid,stockitems) "
+							+ "select itemid,sum(items) from rack "
+							+ "where itemid != 0 group by itemid";
 				
 				//在庫一覧を更新
 				PreparedStatement stmt4 = conn.prepareStatement(sql4);
