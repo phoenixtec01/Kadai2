@@ -89,4 +89,27 @@ import java.sql.*;
 		}
 	}
 	
+	//入荷(出荷)ステータス確認
+	public boolean statuscheak(String code,Connection conn,String mode) throws SQLException {
+		
+		int IOStatus;
+		String sqla = "select * from ";
+		String sqlb = "plan where ";
+		String sqlc = "code = ? and ";
+		String sqld = "status = 1";
+		String sql = sqla + mode + sqlb + mode + sqlc + mode + sqld;
+		PreparedStatement stmt = conn.prepareStatement(sql);
+		
+		stmt.setString(1,code);
+		ResultSet rs = stmt.executeQuery();
+		IOStatus =rs.getInt(mode +"status");//入荷（出荷）していなければ0、入荷（出荷）済みなら1
+		rs.close();
+		stmt.close();
+		if (IOStatus == 0) {
+			return true; //入荷（出荷）未
+		}else {
+			return false; //入荷（出荷）済
+		}
+	}
+	
 }

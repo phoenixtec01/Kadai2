@@ -45,7 +45,12 @@ public class Inputdata {
 			}
 			
 			//入荷状況の確認(指定した予約コードがinputplanデータ内で入荷済み状態ならNG)
-			if (statuscheak(inputcode) == false) {
+			/*if (statuscheak(inputcode) == false) {
+				System.out.println("既に入荷済みです");
+	    		break;
+			}*/
+			
+			if(PC.statuscheak(inputcode, conn, mode)== false) {
 				System.out.println("既に入荷済みです");
 	    		break;
 			}
@@ -61,7 +66,7 @@ public class Inputdata {
 		final int STATUS = 1;
 		final int CODE = 2;
 		try {
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(false); //テーブル自動更新を停止
 		
 			for (;;) {
 				
@@ -81,7 +86,6 @@ public class Inputdata {
 					break;
 				}
 				
-				
 				//指定した棚の棚番号に、入荷予定データの予約番号に一致した商品コード、商品数、入荷予定日を入れるSQL
 				String sql2 ="update rack set "
 						+ "itemid = inputplan.itemid," //棚の商品コードは入荷予定データの商品コード
@@ -98,7 +102,6 @@ public class Inputdata {
 				stmt2.setString(CODE, inputcode);
 			    stmt2.executeUpdate();
 				stmt2.close();
-				
 				
 				//入荷後に入荷予定データの入荷済みフラグをオンにするSQL
 				String sql3 = "update inputplan set inputstatus = ? where inputcode = ? ";
@@ -121,7 +124,7 @@ public class Inputdata {
 			    stmt4.executeUpdate();
 				stmt4.close();
 				
-				conn.commit();
+				conn.commit(); //全データ更新
 				break;
 			}
 
@@ -165,8 +168,8 @@ public class Inputdata {
 		return codeflag;
 	}*/
 	
-	//入荷状況確認
-	private boolean statuscheak(String code)throws SQLException{
+	//入荷状況確認(Parcheakクラスで実装済み)
+	/*private boolean statuscheak(String code)throws SQLException{
 		boolean statusflag = false;
 		String sql0 = "select * from inputplan where inputcode = ? and inputstatus = 1";
 		
@@ -182,7 +185,7 @@ public class Inputdata {
 		rs0.close();
 		stmt0.close();
 		return statusflag;
-	}
+	}*/
 	
 	//SQL切断
 	public void sqlclose() throws SQLException {

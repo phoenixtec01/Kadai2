@@ -102,42 +102,6 @@ public class Outputplan {
 		}
 		return parflag;
 	}
-	//商品コードチェック(Parcheakクラスで実装済み)
-	/*private boolean itemcheak(int id) throws SQLException{
-		boolean itemflag = false;
-
-		String sql0 = " select itemid from master where itemid = ?";
-		PreparedStatement stmt0 = conn.prepareStatement(sql0);
-		
-		stmt0.setInt(1,id);
-		ResultSet rs0 = stmt0.executeQuery();
-		
-		if (rs0.getString("itemid") != null) {//商品コードが存在しなかったらしてなかったらnullを返す
-			itemflag = true;
-		}else {
-			itemflag = false;
-		}
-		
-		return itemflag;
-	}*/
-		
-	//予約コード重複確認(Parcheakクラスで実装済み)
-	/*private boolean codecheak(String code) throws SQLException{
-		boolean codeflag = false;
-		String sql = "select * from outputplan where outputcode = ?";
-		PreparedStatement stmt = conn.prepareStatement(sql);
-		
-		stmt.setString(1,code);
-		ResultSet rs = stmt.executeQuery();
-		if (rs.getString("outputcode") == null) {//コードが重複してなかったらnullを返す
-			codeflag = true;
-		}else {
-			codeflag = false;
-		}
-		rs.close();
-		stmt.close();
-		return codeflag;
-	}*/
 	
 	//データ記入
 	public void datainput() throws SQLException {
@@ -146,7 +110,7 @@ public class Outputplan {
 		final int PLANDAY = 3;
 		final int CODE = 4;
 		final int STATUS = 5;
-		String sql2 = "INSERT INTO outputplan VALUES( ?, ?, ?, ?, ?) ";
+		String sql2 = "INSERT INTO outputplan VALUES( ?, ?, ?, ?, ?) "; //データ記入SQL
 		PreparedStatement stmt2 = conn.prepareStatement(sql2);
 		
 	    stmt2.setInt(ITEMID, outputitemid);
@@ -159,6 +123,43 @@ public class Outputplan {
         stmt2.close();
 	}
 	
+	//商品コードチェック(Parcheakクラスで実装済み)
+		/*private boolean itemcheak(int id) throws SQLException{
+			boolean itemflag = false;
+
+			String sql0 = " select itemid from master where itemid = ?";
+			PreparedStatement stmt0 = conn.prepareStatement(sql0);
+			
+			stmt0.setInt(1,id);
+			ResultSet rs0 = stmt0.executeQuery();
+			
+			if (rs0.getString("itemid") != null) {//商品コードが存在しなかったらしてなかったらnullを返す
+				itemflag = true;
+			}else {
+				itemflag = false;
+			}
+			
+			return itemflag;
+		}*/
+			
+		//予約コード重複確認(Parcheakクラスで実装済み)
+		/*private boolean codecheak(String code) throws SQLException{
+			boolean codeflag = false;
+			String sql = "select * from outputplan where outputcode = ?";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			
+			stmt.setString(1,code);
+			ResultSet rs = stmt.executeQuery();
+			if (rs.getString("outputcode") == null) {//コードが重複してなかったらnullを返す
+				codeflag = true;
+			}else {
+				codeflag = false;
+			}
+			rs.close();
+			stmt.close();
+			return codeflag;
+		}*/
+		
 	//SQL切断
 	public void sqlclose() throws SQLException {
 		if (conn !=null) {

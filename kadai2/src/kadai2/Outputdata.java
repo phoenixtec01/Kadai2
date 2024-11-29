@@ -60,7 +60,12 @@ public class Outputdata {
 			}
 			
 			//出荷状況の確認(指定した予約コードがoutputplanデータ内で出荷済み状態ならNG)
-			if (statuscheak(outputcode) == false) {
+			/*if (statuscheak(outputcode) == false) {
+				System.out.println("既に出荷済みです");
+	    		break;
+			}*/
+			
+			if(PC.statuscheak(outputcode, conn, mode)== false) {
 				System.out.println("既に出荷済みです");
 	    		break;
 			}
@@ -78,7 +83,7 @@ public class Outputdata {
 		final int STATUS = 1;
 		final int CODE = 2;
 		try {
-			conn.setAutoCommit(false);
+			conn.setAutoCommit(false); //テーブル自動更新を停止
 		
 			for (;;) {
 				
@@ -203,12 +208,13 @@ public class Outputdata {
 				}
 				rs5.close();
 				
-				//初期化する棚が無ければここで終了
+				//初期化する棚が無ければここで全テーブルを更新して終了
 				if (rowCount2 == 0) {
-					conn.commit();
+					conn.commit(); //全データ更新
 					break;
 				}
 				
+				//以下、初期化する棚がある場合の処理
 				int resetid[] = new int [rowCount2];
 				int k =0;
 			
@@ -236,7 +242,7 @@ public class Outputdata {
 				    	break;
 				    }			
 				}
-				conn.commit();
+				conn.commit(); //全データ更新
 				break;
 			}
 	
@@ -280,8 +286,8 @@ public class Outputdata {
 		return codeflag;
 	}*/
 	
-	//出荷状況確認
-	private boolean statuscheak(String code)throws SQLException{
+	//出荷状況確認(Parcheakクラスで実装済み)
+	/*private boolean statuscheak(String code)throws SQLException{
 		boolean statusflag = false;
 		String sql0 = "select * from outputplan where outputcode = ? and outputstatus = 1";
 		
@@ -297,7 +303,7 @@ public class Outputdata {
 		rs0.close();
 		stmt0.close();
 		return statusflag;
-	}
+	}*/
 	
 	//SQL切断
 	public void sqlclose() throws SQLException {

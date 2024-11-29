@@ -103,7 +103,26 @@ public class Inputplan{
 		return parflag;
 	}
 	
-
+	//データ記入
+	public void datainput() throws SQLException {
+		final int ITEMID = 1; 
+		final int ITEMS = 2;
+		final int PLANDAY = 3;
+		final int CODE = 4;
+		final int STATUS = 5;
+		String sql2 = "INSERT INTO inputplan VALUES( ?, ?, ?, ?, ?) "; //データ記入SQL
+		PreparedStatement stmt2 = conn.prepareStatement(sql2);
+		
+	    stmt2.setInt(ITEMID, inputitemid);
+	    stmt2.setInt(ITEMS, inputitems);
+	    stmt2.setString(PLANDAY, inputplanday);
+	    stmt2.setString(CODE, inputcode);
+	    stmt2.setInt(STATUS, 0);
+	    stmt2.executeUpdate();
+	    
+        stmt2.close();  
+	}
+	
 	//予約コード重複確認(Parcheakクラスで実装済み)
 	/*private boolean codecheak(String code) throws SQLException{
 		boolean codeflag = false;
@@ -140,28 +159,6 @@ public class Inputplan{
 		
 		return itemflag;
 	}*/
-	
-	//データ記入
-	public void datainput() throws SQLException {
-		final int ITEMID = 1; 
-		final int ITEMS = 2;
-		final int PLANDAY = 3;
-		final int CODE = 4;
-		final int STATUS = 5;
-		String sql2 = "INSERT INTO inputplan VALUES( ?, ?, ?, ?, ?) ";
-		PreparedStatement stmt2 = conn.prepareStatement(sql2);
-		
-	    stmt2.setInt(ITEMID, inputitemid);
-	    stmt2.setInt(ITEMS, inputitems);
-	    stmt2.setString(PLANDAY, inputplanday);
-	    stmt2.setString(CODE, inputcode);
-	    stmt2.setInt(STATUS, 0);
-	    stmt2.executeUpdate();
-	    
-        stmt2.close();
-        
-       
-	}
 	
 	 /*InputList、未実装
 	  	public void listinput () throws SQLException {
